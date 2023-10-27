@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+
+  <PropertyGroup>
+      <TargetFramework>net480</TargetFramework>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dahomey.Cbor" Version="1.21.0" />
+    <PackageReference Include="jose-jwt" Version="4.1.0" />
+    <PackageReference Include="JWT" Version="10.1.1" />
+    <PackageReference Include="Kerberos.NET" Version="4.6.50" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net481" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Mono.Reflection" Version="2.0.0" />
+    <PackageReference Include="NtApiDotNet" Version="1.1.33" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+</Project>

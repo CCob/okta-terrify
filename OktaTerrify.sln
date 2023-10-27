@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OktaTerrify", "OktaTerrify\OktaTerrify.csproj", "{8C4BFE4F-243A-4AF3-8069-42C17591EEF6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OktaCommon", "OktaCommon\OktaCommon.csproj", "{512747DF-A4F3-45CB-8110-BEB583FE0C33}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OktaInk", "OktaInk\OktaInk.csproj", "{93A42428-8C36-42FF-8F09-9ADA7FF15782}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8C4BFE4F-243A-4AF3-8069-42C17591EEF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C4BFE4F-243A-4AF3-8069-42C17591EEF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C4BFE4F-243A-4AF3-8069-42C17591EEF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C4BFE4F-243A-4AF3-8069-42C17591EEF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{512747DF-A4F3-45CB-8110-BEB583FE0C33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{512747DF-A4F3-45CB-8110-BEB583FE0C33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{512747DF-A4F3-45CB-8110-BEB583FE0C33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{512747DF-A4F3-45CB-8110-BEB583FE0C33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93A42428-8C36-42FF-8F09-9ADA7FF15782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93A42428-8C36-42FF-8F09-9ADA7FF15782}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93A42428-8C36-42FF-8F09-9ADA7FF15782}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93A42428-8C36-42FF-8F09-9ADA7FF15782}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D4F4BAC3-E70C-4BB1-824A-24A9B83A2187}
+	EndGlobalSection
+EndGlobal

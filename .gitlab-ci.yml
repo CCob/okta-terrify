@@ -1,0 +1,24 @@
+
+oktaterrify:
+    image: ccob/windows_cross:latest
+    tags: 
+        - docker
+    stage: build
+    script: 
+        - cp PTPTechCA.crt /usr/local/share/ca-certificates
+        - update-ca-certificates
+        - dotnet restore 
+        - dotnet msbuild -clp:disableconsolecolor OktaTerrify.sln -property:Configuration=Release
+        - cp OktaTerrify/bin/Release/net481/OktaTerrify.exe .
+        - cp OktaTerrify/bin/Release/net481/OktaTerrify.exe.config .
+        - cp OktaTerrify/bin/Release/net481/SQLitePCLRaw.core.dll .
+        - cp OktaInk/bin/Release/net481/OktaInk.exe .
+    artifacts:
+        paths:
+            - runtimes/**
+            - OktaTerrify.exe 
+            - OktaTerrify.exe.config
+            - SQLitePCLRaw.core.dll
+            - OktaInk.exe
+            
+            

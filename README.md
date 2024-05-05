@@ -2,7 +2,7 @@
 
 This tools was released as part of my BSides Cymru 2024 talk, Okta Terrify: Persistence in a Passwordless World.  The presentation deck and demonstration video have been included with this repository.
 
-![Okta Terify Video Demo](OktaTerrify.mp4)
+https://github.com/CCob/okta-terrify/assets/3064210/c2fb2a0d-9147-481b-a7a1-a55d9d73d0ea
 
 Okta Terrify is a tool to demonstrate how passwordless solutions such as Okta Verify's FastPass or other FIDO2/WebAuthn type solutions can be abused once an authenticator endpoint has been compromised.  Whilst Okta Terrify demonstrates Okta specific attacks, the same methodology would typically apply to other passwordless solutions, as generally they all leverage asymmetric cryptography.
 

@@ -360,23 +360,25 @@ namespace OktaVerify {
                 log.Error("Sign, Backdoor, Import and Info options are exclusive.  Specify only one");
                 return;
             }
-
+   
             if(databasePath != null) {
                 var dbFileName = Path.GetFileName(databasePath);
                 if (dbFileName == "OVStore.db") {
-                    ;
+                    if (sid == null) {
+                        Console.WriteLine("[!] Database file looks like the legacy format, SID argument needed");
+                        return;
+                    }
                 } else if (dbFileName == "DataStore.db") {
                     if (dbKey == null) {
                         Console.WriteLine("[!] Database file looks like the newer format, supply database key with dbkey argument.  This can be obtained using the following command on the victim machine:\n\rOktaInk -o DumpDBKey");
+                        return;
                     }
                 } else {
-                    Console.WriteLine("[!] Database file should be called OVStore.db (legacy encryption) or DataStore.db (updated encryption)");
+                    Console.WriteLine("[!] Database file name should be OVStore.db or DataStore.db");
                     return;
-                }
-
-                if(sid != null) {
-                    signingInfo = GetDatabaseInfo(sid, databasePath, dbKey);
-                }
+                } 
+                
+                signingInfo = GetDatabaseInfo(sid, databasePath, dbKey);                
             }
 
             log.Info("Okta Terrify is starting....");

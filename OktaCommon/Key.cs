@@ -5,6 +5,7 @@
         DeviceAttestation,
         UserVerification,
         ProofOfPossession,
+        UserVerificationBioOrPin,
         Backdoor
     }
 

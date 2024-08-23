@@ -5,8 +5,6 @@ oktaterrify:
         - docker
     stage: build
     script: 
-        - cp PTPTechCA.crt /usr/local/share/ca-certificates
-        - update-ca-certificates
         - dotnet restore 
         - dotnet msbuild -clp:disableconsolecolor OktaTerrify.sln -property:Configuration=Release
         - cp OktaTerrify/bin/Release/net481/OktaTerrify.exe .

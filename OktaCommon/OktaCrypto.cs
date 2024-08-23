@@ -477,12 +477,12 @@ namespace OktaCommon {
                 .AddClaim("methodEnrollmentId", methodEnrollmentId) //from AuthenticaorVerificationMethod table
                 .AddClaim("nonce", nonce)  //from the challenge JWT?
                 .AddClaim("tx", tx)
-                .AddClaim("deviceSignals", new Dictionary<string, string> {
+                .AddClaim("deviceSignals", new Dictionary<string, string> {                    
                 })
                 .AddClaim("challengeResponseContext", new Dictionary<string, object> {
-                    { "bindingType","CUSTOM_URI"},
-                    { "callerContext", new Dictionary<string,string>{{"validationStatus", "UNKNOWN"}}},
-                    { "userConsent", "APPROVED_CONSENT_PROMPT"}
+                    { "bindingType","LOOPBACK"},
+                    { "userConsent", "APPROVED_CONSENT_PROMPT"},
+                    { "originHeader", audience }
                 })
 
                 .WithAlgorithm(algorithm)

@@ -403,9 +403,9 @@ namespace OktaVerify {
             var httpServer = new LoopbackHttpListener(new int[] { 65112, 8769 }, new Func<string, Task<bool>>(SendChallengeResponse));
 
             httpClient.DefaultRequestHeaders.UserAgent.Clear();
-            httpClient.DefaultRequestHeaders.UserAgent.Add(ProductInfoHeaderValue.Parse("OktaVerify/4.5.3.0"));
-            httpClient.DefaultRequestHeaders.UserAgent.Add(ProductInfoHeaderValue.Parse("WPFDeviceSDK/1.7.4.27"));
-            httpClient.DefaultRequestHeaders.UserAgent.Add(ProductInfoHeaderValue.Parse("Windows/10.0.22621.525"));
+            httpClient.DefaultRequestHeaders.UserAgent.Add(ProductInfoHeaderValue.Parse("OktaVerify/5.1.3.0"));
+            httpClient.DefaultRequestHeaders.UserAgent.Add(ProductInfoHeaderValue.Parse("WPFDeviceSDK/1.8.0.30"));
+            httpClient.DefaultRequestHeaders.UserAgent.Add(ProductInfoHeaderValue.Parse("Windows/10.0.22621.3155"));
             httpClient.DefaultRequestHeaders.UserAgent.Add(ProductInfoHeaderValue.Parse("Microsoft_Corporation/Virtual_Machine"));
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     
